@@ -21,6 +21,7 @@
 !/models/README.txt
 !/ui/fonts/LICENSES.txt
 !/THIRD_PARTY_NOTICES.txt
+!CMakeLists.txt
 
 .DS_Store
 .vs/
