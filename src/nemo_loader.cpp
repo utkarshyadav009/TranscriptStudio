@@ -1,5 +1,7 @@
 #include "nemo_loader.h"
 
+#include <cstdlib>
+
 #include "platform.h"
 
 #if defined(_WIN32)
@@ -28,6 +30,11 @@ bool NemoApi::load(const std::string& dir_, const std::string& flavour_, std::st
         return false;
     }
 #if defined(_WIN32)
+    // A CUDA engine built without the cuBLAS shim needs cuBLAS from the CUDA Toolkit.
+    if (flavour_ == "cuda")
+        if (const char* cuda = std::getenv("CUDA_PATH"))
+            for (const char* sub : {"bin\\x64", "bin"})
+                if (dir_exists(join_path(cuda, sub))) AddDllDirectory(widen(join_path(cuda, sub)).c_str());
     // Search the library's own folder first, so it finds the ggml backend DLLs
     // that belong to this flavour rather than another one.
     HMODULE h = LoadLibraryExW(widen(path).c_str(), nullptr,

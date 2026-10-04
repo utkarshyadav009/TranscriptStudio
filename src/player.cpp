@@ -1,6 +1,7 @@
 #include "player.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <string>
 
 #include "audio_decode.h"
@@ -96,6 +97,8 @@ void Player::fill(float* out, unsigned frames) {
         p += r;
     }
     pos_ = std::min(p, last);
+    static const bool muted = std::getenv("TS_MUTE") != nullptr;  // automated tests: keep time, no sound
+    if (muted) std::fill(out, out + frames, 0.0f);
 }
 
 }  // namespace ts

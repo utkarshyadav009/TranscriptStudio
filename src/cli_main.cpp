@@ -17,6 +17,7 @@
 
 #include "audio_decode.h"
 #include "engine.h"
+#include "project.h"
 #include "nlohmann/json.hpp"
 #include "platform.h"
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv) {
     EngineConfig cfg;
     cfg.engine_root = exe_dir();
     std::string models = join_path(exe_dir(), "models"), out_path, language = "auto";
-    bool speakers = true;
+    bool speakers = true, make_project = false;
     for (size_t i = 2; i < args.size(); i++) {
         const std::string& a = args[i];
         auto next = [&]() { return i + 1 < args.size() ? args[++i] : std::string(); };
@@ -50,6 +51,7 @@ int main(int argc, char** argv) {
         else if (a == "--language") language = next();
         else if (a == "--models") models = next();
         else if (a == "--no-speakers") speakers = false;
+        else if (a == "--project") make_project = true;  // also save a project in the app's library
         else if (a == "--device") {
             const std::string d = next();
             cfg.device = d == "cpu" ? Device::Cpu : d == "gpu" ? Device::Gpu : Device::Auto;
@@ -102,6 +104,16 @@ int main(int argc, char** argv) {
                          "speakers %.1f s\n",
                  t.words.size(), nspk, t.language.empty() ? "?" : t.language.c_str(), t.seconds_asr,
                  t.duration / std::max(0.01, t.seconds_asr), t.seconds_diar);
+
+    if (make_project) {
+        const json p = build_project(t, args[1], file_stem(args[1]), "en");
+        const std::string pp = new_project_path(file_stem(args[1]));
+        if (!save_project(pp, p, err)) {
+            std::fprintf(stderr, "error: %s\n", err.c_str());
+            return 2;
+        }
+        std::fprintf(stderr, "project: %s\n", pp.c_str());
+    }
 
     nlohmann::json j;
     j["duration"] = t.duration;

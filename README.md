@@ -24,4 +24,5 @@ The models (about 820 MB) are downloaded by `scripts/get-models.ps1` / `scripts/
 
 ## Licences
 
-App code: see LICENSE. Third-party components and models: see THIRD_PARTY_NOTICES.txt.
+App code: no licence chosen yet (all rights reserved by the author for now).
+Third-party components and models: see THIRD_PARTY_NOTICES.txt.
