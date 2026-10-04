@@ -4,8 +4,12 @@
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
+#include <vector>
 
 #include "audio_decode.h"
 #include "docx.h"
@@ -128,6 +132,15 @@ class App {
             return json{{"ok", true}};
         });
         sync("listProjects", [](const json&) { return list_projects(); });
+        sync("log", [](const json& a) {  // developer log: %TEMP%/transcript-studio.log
+            const char* tmp = std::getenv("TEMP");
+            if (!tmp) tmp = std::getenv("TMPDIR");
+            std::string all;
+            const std::string path = join_path(tmp ? tmp : ".", "transcript-studio.log");
+            read_file(path, all);
+            write_file_atomic(path, all + (a.empty() ? std::string() : a[0].dump()) + "\n");
+            return json{{"ok", true}};
+        });
         sync("openProject", [this](const json& a) { return open_project(s_at(a, 0)); });
         sync("saveProject", [this](const json& a) {
             if (a.empty() || !a[0].is_object()) return json{{"ok", false}, {"error", "nothing to save"}};
@@ -282,10 +295,12 @@ class App {
         loader_ = std::thread([this, audio, gen] {
             auto pcm = std::make_shared<std::vector<float>>();
             std::string err;
-            const bool ok = file_exists(audio) && decode_audio(audio, *pcm, err);
-            w_.dispatch([this, pcm, ok, gen] {
+            const bool exists = file_exists(audio);
+            const bool ok = exists && decode_audio(audio, *pcm, err);
+            if (!exists) err = "missing";
+            w_.dispatch([this, pcm, ok, gen, err] {
                 if (gen != audio_gen_) return;  // another project was opened meanwhile
-                std::string e;
+                std::string e = err;
                 const bool loaded = ok && player_.load(std::move(*pcm), e);
                 w_.eval("TS.onAudio(" + json{{"ok", loaded}, {"duration", player_.duration()}, {"error", e}}.dump() + ")");
             });

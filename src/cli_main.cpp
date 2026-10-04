@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
         else if (a == "--models") models = next();
         else if (a == "--no-speakers") speakers = false;
         else if (a == "--project") make_project = true;  // also save a project in the app's library
+        else if (a == "--diar-preset") cfg.diar_preset = next();  // e.g. v3-streaming to compare
         else if (a == "--device") {
             const std::string d = next();
             cfg.device = d == "cpu" ? Device::Cpu : d == "gpu" ? Device::Gpu : Device::Auto;

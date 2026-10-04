@@ -68,6 +68,9 @@ struct Engine::Impl {
             dc.size = sizeof(dc);
             dc.model_path = cfg.diar_model.c_str();
             dc.gpu = gpu;
+            // Whole files, not live audio: the offline geometry uses ~21 s chunks instead of
+            // ~1 s low-latency ones, which is about 14x less work for the same model.
+            dc.preset = cfg.diar_preset.empty() ? nullptr : cfg.diar_preset.c_str();
             if (api.nemo_speech_diar_create(&dc, &diar) != NEMO_SPEECH_ASR_OK) {
                 err = flavour_label(name) + " (speakers): " + last_error();
                 close();

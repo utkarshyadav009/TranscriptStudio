@@ -40,6 +40,7 @@ struct EngineConfig {
     std::string engine_root;
     std::string asr_model;   // ASR GGUF path
     std::string diar_model;  // diarization GGUF path; "" = no speaker separation
+    std::string diar_preset = "v3-offline";  // NeMo geometry preset; "" = library default (low latency)
     Device device = Device::Auto;
 };
 

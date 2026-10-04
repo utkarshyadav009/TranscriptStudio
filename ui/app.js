@@ -101,9 +101,11 @@ function renderMeta() {
       <dt>${esc(t("processedOn"))}</dt><dd title="${esc(p.engine && p.engine.device || "")}">${esc(p.engine && p.engine.device || "—")}</dd>
       <dt>${esc(t("audioFile"))}</dt><dd title="${esc(p.audio)}">${esc(audioName)}</dd>
     </dl>
-    ${S.audio ? "" : `<p class="hint" style="color:var(--check)">${esc(t("audioMissing"))}</p>`}
+    ${S.audio ? "" : S.audioLoading ? `<p class="hint">${esc(t("loadingAudio"))}</p>`
+      : `<p class="hint" style="color:var(--check)">${esc(S.audioError && S.audioError !== "missing"
+        ? t("audioError", { error: S.audioError }) : t("audioMissing"))}</p>`}
     <div class="links">
-      ${S.audio ? `<button class="btn" id="mReveal">${esc(t("showFile"))}</button>`
+      ${S.audio || S.audioLoading ? `<button class="btn" id="mReveal">${esc(t("showFile"))}</button>`
                 : `<button class="btn" id="mFind">${esc(t("findAudio"))}</button>`}
       <button class="btn" id="mDelete">${esc(t("deleteRecording"))}</button>
     </div>`;
@@ -376,6 +378,7 @@ async function openProject(path) {
   S.current = -1;
   S.word = -1;
   S.audio = false;
+  S.audioLoading = true;
   S.peaks = null;
   $("docTitle").textContent = S.project.title;
   ["btnWordOpen", "btnWordImport", "btnExport"].forEach((id) => ($(id).disabled = false));
@@ -621,6 +624,8 @@ window.TS = {
   },
   async onAudio(res) {
     S.audio = !!res.ok;
+    S.audioLoading = false;
+    S.audioError = res.ok ? "" : res.error || "";
     S.dur = res.duration || 0;
     updatePlayButton();
     renderMeta();

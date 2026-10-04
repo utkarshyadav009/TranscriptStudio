@@ -1,6 +1,8 @@
 #include "docx.h"
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
 #include <ctime>
 #include <map>
 #include <regex>
