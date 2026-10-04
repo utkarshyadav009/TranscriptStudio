@@ -39,17 +39,29 @@ Re-read this file after every pull — it may have been updated.
 - Success = "Built: …/dist/Transcript Studio.app". Then open it once (`open "dist/Transcript Studio.app"`)
   to confirm the window appears, and tell the owner where the app is.
 
-## When the build fails
-- The macOS code (`src/platform_mac.mm`, `src/audio_decode_mac.cpp`, `scripts/build-mac.sh`,
-  CMake Apple parts) was written on Windows and never compiled on a Mac before. Fixing compile or
-  link errors in those files is expected and allowed. Keep fixes small and Mac-only; do not change
-  Windows code, the interface (`ui/`) or the engine submodule.
-- Keep your fixes on a local branch `mac-fixes` on top of `origin/main` and commit them there
-  (end each commit message with `Co-Authored-By: Claude <noreply@anthropic.com>`).
-  Also write them to `~/TranscriptStudio-mac-fixes.patch` (`git format-patch origin/main --stdout`)
-  and tell the project owner, so they can bring the fixes into the main repository.
-- You have no permission to push to GitHub. Never push.
-- If a problem needs a decision (not just a compile fix), stop and ask the project owner.
+## When the build fails: fix it yourself
+The macOS code (`src/platform_mac.mm`, `src/audio_decode_mac.cpp`, `scripts/build-mac.sh`, the
+`APPLE` parts of `CMakeLists.txt`) was written on Windows. Fixing compile, link, bundling or
+self-test errors is your job — keep going until the build and the self-test pass.
+- **Mac-only files**: change freely (`platform_mac.mm`, `audio_decode_mac.cpp`, `build-mac.sh`,
+  `get-models.sh`, `if(APPLE)` blocks in `CMakeLists.txt`).
+- **Shared files** (`src/*.cpp`/`*.h`, `CMakeLists.txt` outside `if(APPLE)`): only small,
+  portable fixes that are clearly correct on Windows too (a missing `#include`, a standard-library
+  call that only MSVC accepts). Guard anything Apple-specific with `#if defined(__APPLE__)`.
+  Never change behaviour, the interface (`ui/`) or the engine submodule.
+- If a fix would need a design decision, stop and ask the project owner instead.
+
+## Committing and pushing (only once a deploy key is set up — see the owner's prompt)
+- Work on `main`. Before every push: `git fetch origin && git rebase origin/main`, rebuild if
+  the rebase brought in new commits, then push. Never force-push. Never rewrite pushed history.
+- Push only when `scripts/build-mac.sh` (and its self-test) passes with your change.
+- Commit message: what was broken on macOS and how it is fixed, ending with
+  `Co-Authored-By: Claude <noreply@anthropic.com>`. Commit as `Mac build agent <mac-build@transcriptstudio.local>`
+  (repository-local `git config user.name/user.email`).
+- Never commit build output, models, recordings, transcripts or anything personal.
+- After pushing, tell the project owner the commit id and a one-line summary.
+- Without a working deploy key: keep fixes on a local branch `mac-fixes` and write
+  `~/TranscriptStudio-mac-fixes.patch` (`git format-patch origin/main --stdout`) instead.
 
 ## Waiting for new commits (after the first successful build)
 Run a background watcher that exits when the remote `main` changes, so you are woken up:
@@ -61,15 +73,18 @@ echo "new commit on main"
 ```
 When it fires: wait 3 minutes and check again (the owner often pushes several commits in a row;
 wait until `main` stops changing), then:
-1. `git checkout mac-fixes 2>/dev/null || git checkout -b mac-fixes origin/main`
-2. `git fetch origin && git rebase origin/main` — if a conflict appears, the owner probably merged
-   your fix upstream: keep the upstream version (`git rebase --skip` for that commit).
-3. `git submodule update --init --recursive third_party/NeMo-Speech.cpp`
-4. Build (see above), report the result, then start the watcher again.
+1. `git checkout main && git pull --rebase origin main` (ignore your own pushes: if the only new
+   commits are yours, there is nothing to rebuild).
+2. `git submodule update --init --recursive third_party/NeMo-Speech.cpp`
+3. If the new commits only touch `docs/` or `*.md`, re-read this file and go back to watching.
+4. Otherwise build (see above). If it fails, fix it as described above. Report the result, then
+   start the watcher again.
 
 ## Rules
 - Never upload, copy or commit recordings, transcripts (`.tsproj`), Word exports or anything in
   `~/Documents/Transcript Studio` — that is private research data, often children's voices.
 - Do not install anything beyond: Xcode Command Line Tools, Homebrew, and the Homebrew packages named
   in this file and in `scripts/build-mac.sh`.
+- The only credential you use is this repository's deploy key (`~/.ssh/transcriptstudio_deploy`).
+  Never print or share its private part.
 - Do not change system settings, and do not delete anything outside `~/TranscriptStudio`.
