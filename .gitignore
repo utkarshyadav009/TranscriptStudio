@@ -1,0 +1,27 @@
+# build output
+/build*/
+/dist/
+*.log
+
+# speech models are downloaded by scripts/get-models.*, never committed
+/models/*
+!/models/README.txt
+
+# never commit recordings, transcripts or exports (research data)
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.mov
+*.flac
+*.aac
+*.tsproj
+*.docx
+*.txt
+!/models/README.txt
+!/ui/fonts/LICENSES.txt
+!/THIRD_PARTY_NOTICES.txt
+
+.DS_Store
+.vs/
+.vscode/

@@ -1,0 +1,18 @@
+# Turns the interface files into a C++ source file, so the app is a single program.
+# cmake -DOUT=ui_bundle.cpp -DROOT=<ui dir> -DFILES="index.html|app.css|..." -P embed_ui.cmake
+string(REPLACE "|" ";" FILES "${FILES}")
+set(code "// Generated from ui/ by cmake/embed_ui.cmake - do not edit.\nnamespace ts {\n")
+string(APPEND code "struct UiFile { const char* name; const unsigned char* data; unsigned long size; };\n")
+set(table "")
+set(i 0)
+foreach(f IN LISTS FILES)
+  file(READ "${ROOT}/${f}" hex HEX)
+  string(LENGTH "${hex}" n)
+  math(EXPR bytes "${n} / 2")
+  string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," arr "${hex}")
+  string(APPEND code "static const unsigned char f${i}[] = {${arr}0};\n")
+  string(APPEND table "  {\"${f}\", f${i}, ${bytes}},\n")
+  math(EXPR i "${i} + 1")
+endforeach()
+string(APPEND code "extern const UiFile kUiFiles[] = {\n${table}};\nextern const int kUiFileCount = ${i};\n}  // namespace ts\n")
+file(WRITE "${OUT}" "${code}")

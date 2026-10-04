@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Transcript Studio</title>
+<style>/*{{CSS}}*/</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand" data-i18n="appName">Transcript Studio</div>
+  <div class="doc-title" id="docTitle"></div>
+  <div class="top-actions">
+    <button class="btn" id="btnWordOpen" data-i18n="editInWord" disabled>Edit in Word</button>
+    <button class="btn" id="btnWordImport" data-i18n="bringBack" disabled>Bring back from Word</button>
+    <div class="menu">
+      <button class="btn" id="btnExport" disabled><span data-i18n="exportMenu">Export</span> ▾</button>
+      <div class="menu-list" id="exportMenu" hidden>
+        <button id="expWord" data-i18n="exportWord">Word document</button>
+        <button id="expText" data-i18n="exportText">Plain text</button>
+      </div>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="en">EN</button><button data-lang="it">IT</button>
+    </div>
+  </div>
+</header>
+
+<main class="cols">
+  <aside class="col-left">
+    <div class="col-head"><h2 data-i18n="recordings">Recordings</h2></div>
+    <div class="section"><button class="btn primary block" id="btnNew">+ <span data-i18n="newTranscription">New transcription</span></button></div>
+    <ul class="library" id="library"></ul>
+    <section class="meta" id="meta" hidden>
+      <div class="col-head"><h2 data-i18n="details">Details</h2></div>
+      <div class="section" id="metaBody"></div>
+    </section>
+  </aside>
+
+  <section class="col-center">
+    <div class="center-head" id="centerHead" hidden>
+      <input type="search" id="search" data-i18n-ph="search" placeholder="Search the transcript">
+      <label class="toggle"><input type="checkbox" id="onlyCheck"> <span data-i18n="onlyToCheck">Only lines to check</span></label>
+      <span class="count mono" id="checkCount"></span>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="welcome" id="welcome">
+        <h1 data-i18n="welcomeTitle">Transcribe a recording</h1>
+        <p data-i18n="welcomeText"></p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="col-right" id="right">
+    <div id="rightBody" hidden>
+      <div class="col-head"><h2 data-i18n="speakers">Speakers</h2></div>
+      <ul class="speakers" id="speakers"></ul>
+      <div class="col-head"><h2 data-i18n="checking">Checking</h2></div>
+      <div class="section" id="checking"></div>
+      <div class="section">
+        <label class="field"><span data-i18n="yourName">Your name</span><input type="text" id="reviewer"></label>
+        <p class="hint mono" data-i18n="shortcuts"></p>
+      </div>
+      <div class="savestate" id="saveState"></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="player">
+  <div class="controls">
+    <button class="icon" id="btnBack" data-i18n-title="back5">−5s</button>
+    <button class="btn primary play" id="btnPlay" disabled>▶ <span data-i18n="play">Play</span></button>
+    <button class="icon" id="btnFwd" data-i18n-title="forward5">+5s</button>
+    <select id="speed" data-i18n-title="speed">
+      <option value="0.75">0.75×</option><option value="1" selected>1×</option>
+      <option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+    </select>
+    <div class="clock" id="clock"><b>00:00</b> / 00:00</div>
+  </div>
+  <div class="wave-wrap" id="waveWrap"><canvas id="wave"></canvas></div>
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="dialog">
+    <header><h2 data-i18n="ntTitle">New transcription</h2></header>
+    <div class="body" id="ntPick">
+      <div class="pick">
+        <button class="btn primary" id="ntChoose" data-i18n="ntChoose">Choose a recording</button>
+        <p class="muted" data-i18n="ntFormats"></p>
+        <div class="file" id="ntFile"></div>
+      </div>
+      <label class="field" id="ntNameRow" hidden><span data-i18n="ntName">Name</span><input type="text" id="ntName"></label>
+      <p class="hint" data-i18n="ntSpeakersNote"></p>
+    </div>
+    <div class="body" id="ntRun" hidden>
+      <ul class="steps">
+        <li data-step="read" data-i18n="stepRead">Reading the recording</li>
+        <li data-step="words" data-i18n="stepWords">Writing down the words</li>
+        <li data-step="speakers" data-i18n="stepSpeakers">Telling the speakers apart</li>
+      </ul>
+      <div class="bigbar"><i id="ntBar" style="width:0"></i></div>
+      <div class="mono muted" id="ntInfo"></div>
+    </div>
+    <div class="body" id="ntError" hidden>
+      <h3 data-i18n="errorTitle">Something went wrong</h3>
+      <p class="mono" id="ntErrText" style="white-space:pre-wrap"></p>
+    </div>
+    <footer>
+      <button class="btn" id="ntCancel" data-i18n="ntCancel">Cancel</button>
+      <button class="btn primary" id="ntStart" data-i18n="ntStart" disabled>Start</button>
+    </footer>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>/*{{I18N}}*/</script>
+<script>/*{{JS}}*/</script>
+</body>
+</html>
